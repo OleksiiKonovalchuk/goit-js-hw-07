@@ -8,8 +8,45 @@ const instance = basicLightbox.create(`
 const refs = {
 	gallery: document.querySelector('.gallery'),
 	source: instance.element().querySelector('img'),
-	link: document.querySelector('.gallery__link'),
 }
+function galleryCreator(gallery) {
+	const galleryToAdd = []
+	gallery.map(({ preview, original, description }) => {
+		const image = `
+		<div class="gallery__item">
+		<a class="gallery__link" href="${original}"> 
+		<img
+		class="gallery__image"
+		src="${preview}"
+		data-source="${original}"
+		alt="${description}"
+		/>
+		</a>
+		</div>
+		`
+		galleryToAdd.push(image)
+	})
+	return refs.gallery.insertAdjacentHTML('afterbegin', galleryToAdd.join(''))
+}
+galleryCreator(galleryItems)
+function closeModal(e) {
+	if (e.code === 'Escape') {
+		instance.close()
+		return window.removeEventListener('keydown', closeModal)
+	}
+}
+function galleryView(e) {
+	e.preventDefault()
+	if (e.target.nodeName !== 'IMG') {
+		return
+	}
+	e.target.src = e.target.dataset.source
+	refs.source.src = e.target.dataset.source
+	refs.source.alt = e.target.alt
+	window.addEventListener('keydown', closeModal)
+	return instance.show()
+}
+refs.gallery.addEventListener('click', galleryView)
 
 // const galleryCreator = (gallery) => {
 // 	const galleryToAdd = []
@@ -22,44 +59,3 @@ const refs = {
 // 	})
 // 	refs.gallery.append(...galleryToAdd)
 // }
-
-const galleryCreator = (gallery) => {
-	const galleryToAdd = []
-	gallery.map(({ preview, original, description }) => {
-		const image = `
-			<div class="gallery__item">
-				<a class="gallery__link" href="${original}"> 
-					<img
-						class="gallery__image"
-						src="${preview}"
-						data-source="${original}"
-						alt="${description}"
-					/>
-				</a>
-			</div>
-		`
-		galleryToAdd.push(image)
-	})
-
-	return refs.gallery.insertAdjacentHTML('afterbegin', galleryToAdd.join(''))
-}
-
-galleryCreator(galleryItems)
-document.querySelector('.gallery__link').addEventListener('click', (e) => e.preventDefault)
-const closeModal = (e) => {
-	if (e.key === 'Escape') {
-		instance.close()
-		return window.removeEventListener('keydown', closeModal)
-	}
-}
-const galleryView = (e) => {
-	if (e.target === e.currentTarget) {
-		return
-	}
-	e.target.preventDefault
-	const theItem = galleryItems.find(({ description }) => description === e.target.alt)
-	refs.source.src = theItem.original
-	window.addEventListener('keydown', closeModal)
-	return instance.show()
-}
-refs.gallery.addEventListener('click', galleryView)
